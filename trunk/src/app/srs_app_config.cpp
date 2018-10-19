@@ -1913,7 +1913,7 @@ int SrsConfig::check_config()
             } else if (n == "http_hooks") {
                 for (int j = 0; j < (int)conf->directives.size(); j++) {
                     string m = conf->at(j)->name.c_str();
-                    if (m != "enabled" && m != "on_connect" && m != "on_close" && m != "on_publish"
+                    if (m != "enabled" && m != "on_connect" && m != "on_close" && m != "on_publish_rewrite" && m != "on_publish"
                         && m != "on_unpublish" && m != "on_play" && m != "on_stop"
                         && m != "on_dvr" && m != "on_hls" && m != "on_hls_notify"
                         ) {
@@ -2786,6 +2786,17 @@ SrsConfDirective* SrsConfig::get_vhost_on_close(string vhost)
     }
     
     return conf->get("on_close");
+}
+
+SrsConfDirective* SrsConfig::get_vhost_on_publish_rewrite(string vhost)
+{
+    SrsConfDirective* conf = get_vhost_http_hooks(vhost);
+
+    if (!conf) {
+        return NULL;
+    }
+
+    return conf->get("on_publish_rewrite");
 }
 
 SrsConfDirective* SrsConfig::get_vhost_on_publish(string vhost)

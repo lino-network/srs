@@ -125,6 +125,43 @@ void SrsHttpHooks::on_close(string url, SrsRequest* req, int64_t send_bytes, int
     return;
 }
 
+int SrsHttpHooks::on_publish_rewrite(string url, SrsRequest* req, std::string& newName)
+{
+    int ret = ERROR_SUCCESS;
+
+    int client_id = _srs_context->get_id();
+
+    std::stringstream ss;
+    ss << SRS_JOBJECT_START
+        << SRS_JFIELD_STR("action", "on_publish_rewrite") << SRS_JFIELD_CONT
+        << SRS_JFIELD_ORG("client_id", client_id) << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("ip", req->ip) << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("vhost", req->vhost) << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("app", req->app) << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("tcUrl", req->tcUrl) << SRS_JFIELD_CONT  // Add tcUrl for auth publish rtmp stream client
+        << SRS_JFIELD_STR("stream", req->stream) << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("param", req->param)
+        << SRS_JOBJECT_END;
+
+    std::string data = ss.str();
+    std::string res;
+    int status_code;
+    if ((ret = do_post_text_response(url, data, status_code, res)) != ERROR_SUCCESS) {
+        srs_error("http post on_publish_rewrite uri failed. "
+            "client_id=%d, url=%s, request=%s, response=%s, code=%d, ret=%d",
+            client_id, url.c_str(), data.c_str(), res.c_str(), status_code, ret);
+        return ret;
+    }
+
+    // TODO(yumin): check name valid.
+    newName = res;
+    srs_trace("http hook on_publish_rewrite success. "
+        "client_id=%d, url=%s, request=%s, response=%s, ret=%d",
+        client_id, url.c_str(), data.c_str(), res.c_str(), ret);
+
+    return ret;
+}
+
 int SrsHttpHooks::on_publish(string url, SrsRequest* req)
 {
     int ret = ERROR_SUCCESS;
@@ -489,6 +526,51 @@ int SrsHttpHooks::do_post(std::string url, std::string req, int& code, string& r
     if ((res_code->to_integer()) != ERROR_SUCCESS) {
         ret = ERROR_RESPONSE_CODE;
         srs_error("error response code=%d. ret=%d", res_code->to_integer(), ret);
+        return ret;
+    }
+
+    return ret;
+}
+
+int SrsHttpHooks::do_post_text_response(
+    std::string url, std::string req, int& code, std::string& textRes)
+{
+    int ret = ERROR_SUCCESS;
+
+    SrsHttpUri uri;
+    if ((ret = uri.initialize(url)) != ERROR_SUCCESS) {
+        srs_error("http: post failed. url=%s, ret=%d", url.c_str(), ret);
+        return ret;
+    }
+
+    SrsHttpClient http;
+    if ((ret = http.initialize(uri.get_host(), uri.get_port())) != ERROR_SUCCESS) {
+        return ret;
+    }
+
+    ISrsHttpMessage* msg = NULL;
+    if ((ret = http.post(uri.get_path(), req, &msg)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    SrsAutoFree(ISrsHttpMessage, msg);
+
+    code = msg->status_code();
+    if ((ret = msg->body_read_all(textRes)) != ERROR_SUCCESS) {
+        return ret;
+    }
+
+    // ensure the http status is ok.
+    // https://github.com/ossrs/srs/issues/158
+    if (code != SRS_CONSTS_HTTP_OK) {
+        ret = ERROR_HTTP_STATUS_INVALID;
+        srs_error("invalid response status=%d. ret=%d", code, ret);
+        return ret;
+    }
+
+    // should never be empty.
+    if (textRes.empty()) {
+        ret = ERROR_HTTP_DATA_INVALID;
+        srs_error("invalid empty response. ret=%d", ret);
         return ret;
     }
 

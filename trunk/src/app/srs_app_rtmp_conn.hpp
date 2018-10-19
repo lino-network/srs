@@ -88,7 +88,7 @@ private:
     bool realtime;
     // the minimal interval in ms for delivery stream.
     double send_min_interval;
-    // publish 1st packet timeout in ms
+    // publish 1st p
     int publish_1stpkt_timeout;
     // publish normal packet timeout in ms
     int publish_normal_timeout;
@@ -142,6 +142,7 @@ private:
 private:
     virtual int http_hooks_on_connect();
     virtual void http_hooks_on_close();
+    virtual int http_hooks_on_publish_rewrite(std::string& stream_name);
     virtual int http_hooks_on_publish();
     virtual void http_hooks_on_unpublish();
     virtual int http_hooks_on_play();

@@ -66,6 +66,12 @@ public:
     */
     static void on_close(std::string url, SrsRequest* req, int64_t send_bytes, int64_t recv_bytes);
     /**
+    * on_publish_rewrite hook, before client(encoder) start to publish stream
+    * @param url the api server url, to valid the client. 
+    *         ignore if empty.
+    */
+    static int on_publish_rewrite(std::string url, SrsRequest* req, std::string& newName);
+    /**
     * on_publish hook, when client(encoder) start to publish stream
     * @param url the api server url, to valid the client. 
     *         ignore if empty.
@@ -121,6 +127,9 @@ public:
     static int on_hls_notify(int cid, std::string url, SrsRequest* req, std::string ts_url, int nb_notify);
 private:
     static int do_post(std::string url, std::string req, int& code, std::string& res);
+    static int do_post_text_response(
+        std::string url, std::string req, int& code, std::string& textRes);
+
 };
 
 #endif
