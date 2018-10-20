@@ -592,6 +592,11 @@ public:
     */
     virtual SrsConfDirective*   get_vhost_on_close(std::string vhost);
     /**
+    * get the on_publish_rewrite callbacks of vhost.
+    * @return the on_publish callback directive, the args is the url to callback.
+    */
+    virtual SrsConfDirective*   get_vhost_on_publish_rewrite(std::string vhost);
+    /**
     * get the on_publish callbacks of vhost.
     * @return the on_publish callback directive, the args is the url to callback.
     */

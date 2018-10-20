@@ -484,7 +484,24 @@ int SrsRtmpConn::stream_service_cycle()
         return ret;
     }
     srs_info("security check ok");
-    
+
+    // XXX(yumin): before process stream, make a publish_rewrite HTTP request, if configured,
+    // to map the cipher name to plain name.
+    // Note that, non-200 response will close this connection.
+    // so does illegal response(TODO).
+    if (type == SrsRtmpConnFMLEPublish || type == SrsRtmpConnHaivisionPublish || type == SrsRtmpConnFlashPublish) {
+        string newStreamName = "";
+        if ((ret = http_hooks_on_publish_rewrite(newStreamName)) != ERROR_SUCCESS) {
+            srs_error("http hook on_publish_rewrite failed. ret=%d", ret);
+            return ret;
+        }
+        srs_trace("publish rewrite: stream(%s ====> %s), tcUrl=%s vhost=%s, port=%s, app=%s, param=%s, args=%s",
+                  req->stream.c_str(), newStreamName.c_str(),
+                  req->tcUrl.c_str(), req->vhost.c_str(), req->port.c_str(),
+                  req->app.c_str(), req->param.c_str(), (req->args? "(obj)":"null"));
+        req->stream = newStreamName;
+    }
+
     // Never allow the empty stream name, for HLS may write to a file with empty name.
     // @see https://github.com/ossrs/srs/issues/834
     if (req->stream.empty()) {
@@ -1426,6 +1443,49 @@ void SrsRtmpConn::http_hooks_on_close()
         SrsHttpHooks::on_close(url, req, kbps->get_send_bytes(), kbps->get_recv_bytes());
     }
 #endif
+}
+
+int SrsRtmpConn::http_hooks_on_publish_rewrite(std::string& stream_name)
+{
+    int ret = ERROR_SUCCESS;
+
+#ifdef SRS_AUTO_HTTP_CALLBACK
+    if (!_srs_config->get_vhost_http_hooks_enabled(req->vhost)) {
+        return ret;
+    }
+
+    // the http hooks will cause context switch,
+    // so we must copy all hooks for the on_connect may freed.
+    // @see https://github.com/ossrs/srs/issues/475
+    vector<string> hooks;
+
+    if (true) {
+        SrsConfDirective* conf = _srs_config->get_vhost_on_publish_rewrite(req->vhost);
+
+        if (!conf) {
+            srs_info("ignore the empty http callback: on_publish_rewrite");
+            return ret;
+        }
+
+        hooks = conf->args;
+    }
+
+    if (hooks.size() > 0) {
+        std::string& url = hooks.front();
+        if (hooks.size() > 1) {
+            srs_trace("the number of publish_rewrite hooks should be 1, "
+                      "using %s, others are skipped", url.c_str());
+        }
+        if ((ret = SrsHttpHooks::on_publish_rewrite(url, req, stream_name)) != ERROR_SUCCESS) {
+            srs_error("hook client on_publish_rewrite failed. url=%s, ret=%d", url.c_str(), ret);
+            return ret;
+        }
+
+    }
+
+#endif
+
+    return ret;
 }
 
 int SrsRtmpConn::http_hooks_on_publish()
