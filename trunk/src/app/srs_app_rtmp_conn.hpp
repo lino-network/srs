@@ -142,7 +142,7 @@ private:
 private:
     virtual int http_hooks_on_connect();
     virtual void http_hooks_on_close();
-    virtual int http_hooks_on_publish_rewrite(std::string& stream_name);
+    virtual int http_hooks_on_publish_rewrite(std::string& streamName);
     virtual int http_hooks_on_publish();
     virtual void http_hooks_on_unpublish();
     virtual int http_hooks_on_play();

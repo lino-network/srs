@@ -495,11 +495,14 @@ int SrsRtmpConn::stream_service_cycle()
             srs_error("http hook on_publish_rewrite failed. ret=%d", ret);
             return ret;
         }
-        srs_trace("publish rewrite: stream(%s ====> %s), tcUrl=%s vhost=%s, port=%s, app=%s, param=%s, args=%s",
-                  req->stream.c_str(), newStreamName.c_str(),
-                  req->tcUrl.c_str(), req->vhost.c_str(), req->port.c_str(),
-                  req->app.c_str(), req->param.c_str(), (req->args? "(obj)":"null"));
-        req->stream = newStreamName;
+        // XXX(yumin): should use optional<>.
+        if (newStreamName != "") {
+            srs_trace("publish rewrite: stream(%s ====> %s), tcUrl=%s vhost=%s, port=%s, app=%s, param=%s, args=%s",
+                      req->stream.c_str(), newStreamName.c_str(),
+                      req->tcUrl.c_str(), req->vhost.c_str(), req->port.c_str(),
+                      req->app.c_str(), req->param.c_str(), (req->args? "(obj)":"null"));
+            req->stream = newStreamName;
+        }
     }
 
     // Never allow the empty stream name, for HLS may write to a file with empty name.
@@ -1445,7 +1448,8 @@ void SrsRtmpConn::http_hooks_on_close()
 #endif
 }
 
-int SrsRtmpConn::http_hooks_on_publish_rewrite(std::string& stream_name)
+// stream_name is set to be "" if not enable.
+int SrsRtmpConn::http_hooks_on_publish_rewrite(std::string& streamName)
 {
     int ret = ERROR_SUCCESS;
 
@@ -1476,11 +1480,13 @@ int SrsRtmpConn::http_hooks_on_publish_rewrite(std::string& stream_name)
             srs_trace("the number of publish_rewrite hooks should be 1, "
                       "using %s, others are skipped", url.c_str());
         }
-        if ((ret = SrsHttpHooks::on_publish_rewrite(url, req, stream_name)) != ERROR_SUCCESS) {
+        if ((ret = SrsHttpHooks::on_publish_rewrite(url, req, streamName)) != ERROR_SUCCESS) {
             srs_error("hook client on_publish_rewrite failed. url=%s, ret=%d", url.c_str(), ret);
             return ret;
         }
 
+    } else {
+        streamName = "";
     }
 
 #endif
