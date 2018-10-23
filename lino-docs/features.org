@@ -1,0 +1,36 @@
+* rewrite_on_publish
+add a rewrite stream name and authentication callback.
+
+** Request
+#+begin_src json
+{
+"action":"on_publish_rewrite",
+"client_id":235,
+"ip":"10.0.2.2",
+"vhost":"__defaultVhost__",
+"app":"live",
+"tcUrl":"rtmp://192.168.1.249/live",
+"stream":"hduxhwhzjdbxhx",
+"param":""
+}
+
+#+end_src
+
+** Response
++ status code 200: the response body is the new name for this stream.
++ any other status code: authentication failed.
+
+** example config
+#+begin_src conf
+
+# conf/rtmp.conf
+listen              1935;
+max_connections     1000;
+vhost __defaultVhost__ {
+    http_hooks {
+        enabled                 on;
+        on_publish_rewrite      http://127.0.0.1:8888/rewrite;
+    }
+}
+
+#+end_src
