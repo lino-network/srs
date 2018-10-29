@@ -863,8 +863,7 @@ int SrsHlsMuxer::_refresh_m3u8(string m3u8_file)
     // #EXT-X-ALLOW-CACHE:YES\n
     std::stringstream ss;
     ss << "#EXTM3U" << SRS_CONSTS_LF
-        << "#EXT-X-VERSION:3" << SRS_CONSTS_LF
-        << "#EXT-X-ALLOW-CACHE:YES" << SRS_CONSTS_LF;
+       << "#EXT-X-VERSION:3" << SRS_CONSTS_LF;
     srs_verbose("write m3u8 header success.");
     
     // #EXT-X-MEDIA-SEQUENCE:4294967295\n
