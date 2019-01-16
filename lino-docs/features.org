@@ -5,6 +5,7 @@ add a rewrite stream name and authentication callback.
 #+begin_src json
 {
 "action":"on_publish_rewrite",
+"address_ref": "stg.dlive.ingest2",
 "client_id":235,
 "ip":"10.0.2.2",
 "vhost":"__defaultVhost__",

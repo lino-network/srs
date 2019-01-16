@@ -125,7 +125,7 @@ void SrsHttpHooks::on_close(string url, SrsRequest* req, int64_t send_bytes, int
     return;
 }
 
-int SrsHttpHooks::on_publish_rewrite(string url, SrsRequest* req, std::string& newName)
+int SrsHttpHooks::on_publish_rewrite(string url, string from, SrsRequest* req, std::string& newName)
 {
     int ret = ERROR_SUCCESS;
 
@@ -134,6 +134,7 @@ int SrsHttpHooks::on_publish_rewrite(string url, SrsRequest* req, std::string& n
     std::stringstream ss;
     ss << SRS_JOBJECT_START
         << SRS_JFIELD_STR("action", "on_publish_rewrite") << SRS_JFIELD_CONT
+        << SRS_JFIELD_STR("address_ref", from) << SRS_JFIELD_CONT
         << SRS_JFIELD_ORG("client_id", client_id) << SRS_JFIELD_CONT
         << SRS_JFIELD_STR("ip", req->ip) << SRS_JFIELD_CONT
         << SRS_JFIELD_STR("vhost", req->vhost) << SRS_JFIELD_CONT

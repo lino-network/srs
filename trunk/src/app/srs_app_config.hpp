@@ -1126,6 +1126,9 @@ public:
     * @return the disk device name to stat. NULL if not configed.
     */
     virtual SrsConfDirective*   get_stats_disk_device();
+// lino section
+public:
+    virtual std::string         get_address_ref();
 };
 
 namespace _srs_internal

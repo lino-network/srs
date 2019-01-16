@@ -1567,12 +1567,12 @@ int SrsConfig::check_config()
     for (int i = 0; i < (int)root->directives.size(); i++) {
         SrsConfDirective* conf = root->at(i);
         std::string n = conf->name;
-        if (n != "listen" && n != "pid" && n != "chunk_size" && n != "ff_log_dir" 
+        if (n != "listen" && n != "pid" && n != "chunk_size" && n != "ff_log_dir"
             && n != "srs_log_tank" && n != "srs_log_level" && n != "srs_log_file"
             && n != "max_connections" && n != "daemon" && n != "heartbeat"
             && n != "http_api" && n != "stats" && n != "vhost" && n != "pithy_print_ms"
             && n != "http_stream" && n != "http_server" && n != "stream_caster"
-            && n != "utc_time" && n != "work_dir" && n != "asprocess"
+            && n != "utc_time" && n != "work_dir" && n != "asprocess" && n != "address_ref"
         ) {
             ret = ERROR_SYSTEM_CONFIG_INVALID;
             srs_error("unsupported directive %s, ret=%d", n.c_str(), ret);
@@ -4497,6 +4497,18 @@ SrsConfDirective* SrsConfig::get_stats_disk_device()
     }
     
     return conf;
+}
+
+string SrsConfig::get_address_ref()
+{
+    srs_assert(root);
+
+    SrsConfDirective* conf = root->get("address_ref");
+    if (!conf || conf->arg0().empty()) {
+        return "";
+    }
+
+    return conf->arg0();
 }
 
 namespace _srs_internal

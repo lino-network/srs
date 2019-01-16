@@ -67,10 +67,12 @@ public:
     static void on_close(std::string url, SrsRequest* req, int64_t send_bytes, int64_t recv_bytes);
     /**
     * on_publish_rewrite hook, before client(encoder) start to publish stream
-    * @param url the api server url, to valid the client. 
+    * @param url the api server url, to valid the client.
+    * @param from the interval address of server, where downstream can use it to pull stream from.
     *         ignore if empty.
     */
-    static int on_publish_rewrite(std::string url, SrsRequest* req, std::string& newName);
+    static int on_publish_rewrite(
+        std::string url, std::string from, SrsRequest* req, std::string& newName);
     /**
     * on_publish hook, when client(encoder) start to publish stream
     * @param url the api server url, to valid the client. 

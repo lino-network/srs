@@ -1480,7 +1480,8 @@ int SrsRtmpConn::http_hooks_on_publish_rewrite(std::string& streamName)
             srs_trace("the number of publish_rewrite hooks should be 1, "
                       "using %s, others are skipped", url.c_str());
         }
-        if ((ret = SrsHttpHooks::on_publish_rewrite(url, req, streamName)) != ERROR_SUCCESS) {
+        if ((ret = SrsHttpHooks::on_publish_rewrite(
+                 url, _srs_config->get_address_ref(), req, streamName)) != ERROR_SUCCESS) {
             srs_error("hook client on_publish_rewrite failed. url=%s, ret=%d", url.c_str(), ret);
             return ret;
         }
