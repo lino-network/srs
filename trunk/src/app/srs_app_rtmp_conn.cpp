@@ -130,13 +130,13 @@ int SrsRtmpConn::do_cycle()
 {
     int ret = ERROR_SUCCESS;
     
-    srs_trace("RTMP client ip=%s", ip.c_str());
+    srs_info("RTMP client ip=%s", ip.c_str());
 
     rtmp->set_recv_timeout(SRS_CONSTS_RTMP_RECV_TIMEOUT_US);
     rtmp->set_send_timeout(SRS_CONSTS_RTMP_SEND_TIMEOUT_US);
     
     if ((ret = rtmp->handshake()) != ERROR_SUCCESS) {
-        srs_error("rtmp handshake failed. ret=%d", ret);
+        srs_info("rtmp handshake failed. ret=%d", ret);
         return ret;
     }
     srs_verbose("rtmp handshake success");

@@ -1832,7 +1832,7 @@ int SrsHandshakeBytes::read_c0c1(ISrsProtocolReaderWriter* io)
     
     c0c1 = new char[1537];
     if ((ret = io->read_fully(c0c1, 1537, &nsize)) != ERROR_SUCCESS) {
-        srs_warn("read c0c1 failed. ret=%d", ret);
+        srs_info("read c0c1 failed. ret=%d", ret);
         return ret;
     }
     srs_verbose("read c0c1 success.");

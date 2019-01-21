@@ -100,7 +100,7 @@ int SrsConnection::cycle()
     
     // client close peer.
     if (ret == ERROR_SOCKET_CLOSED) {
-        srs_warn("client disconnect peer. ret=%d", ret);
+        srs_info("client disconnect peer. ret=%d", ret);
     }
 
     return ERROR_SUCCESS;
