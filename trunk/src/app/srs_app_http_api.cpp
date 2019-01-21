@@ -953,10 +953,16 @@ int SrsHttpApi::process_request(ISrsHttpResponseWriter* w, ISrsHttpMessage* r)
     SrsHttpMessage* hm = dynamic_cast<SrsHttpMessage*>(r);
     srs_assert(hm);
     
-    srs_trace("HTTP API %s %s, content-length=%"PRId64", chunked=%d/%d",
-        r->method_str().c_str(), r->url().c_str(), r->content_length(),
-        hm->is_chunked(), hm->is_infinite_chunked());
-    
+    // XXX(yumin): summary has lower log level because we are probing it as health check.
+    if (r->url().find("summaries") != std::string::npos) {
+        srs_info("HTTP API %s %s, content-length=%"PRId64", chunked=%d/%d",
+                  r->method_str().c_str(), r->url().c_str(), r->content_length(),
+                  hm->is_chunked(), hm->is_infinite_chunked());
+    } else {
+        srs_trace("HTTP API %s %s, content-length=%"PRId64", chunked=%d/%d",
+                  r->method_str().c_str(), r->url().c_str(), r->content_length(),
+                  hm->is_chunked(), hm->is_infinite_chunked());
+    }
     // method is OPTIONS and enable crossdomain, required crossdomain header.
     if (r->is_http_options() && _srs_config->get_http_api_crossdomain()) {
         crossdomain_required = true;
